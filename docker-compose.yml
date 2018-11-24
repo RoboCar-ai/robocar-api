@@ -1,0 +1,17 @@
+version: '3'
+services:
+  web:
+    build: .
+    image: blown302/robocar-ai
+    command: ['python3', '/app/app.py']
+    volumes:
+      - .:/app
+    ports:
+      - 5000:5000
+    environment:
+      - BROKER_HOST=broker
+  broker:
+    image: eclipse-mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
