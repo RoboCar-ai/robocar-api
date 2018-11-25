@@ -1,7 +1,9 @@
 from os import path, mkdir, listdir
 from json import dumps as to_json
+import pathlib
+from glob import glob
 
-DATA_DIRECTORY = '/app/data'
+DATA_DIRECTORY = '/data/data'
 SESSIONS_DIRECTORY = 'sessions'
 SESSIONS_DIRECTORY_PATH = path.join(DATA_DIRECTORY, SESSIONS_DIRECTORY)
 SESSIONS_FILE_PATH = path.join(SESSIONS_DIRECTORY_PATH, 'sessions.json')
@@ -18,27 +20,26 @@ def init():
 
 
 def create_session(new_name):
-    max_count = 0
-    for s in get_sessions():
-
-        existing_name, str_count = s.split('::')
-
-        if existing_name == new_name:
-            count = int(str_count)
-            if max_count < count:
-                max_count = count
-
-    new_count = max_count + 1
+    name_sessions = [int(s) for s in get_sessions_by_name(new_name)]
+    new_count = max(name_sessions) + 1
     with open(SESSIONS_FILE_PATH, 'w') as f:
         f.write(to_json({'name': new_name, 'count': new_count}))
 
-    mkdir('{}/{}::{}'.format(SESSIONS_DIRECTORY_PATH, new_name, new_count))
+    pathlib.Path(path.join(SESSIONS_DIRECTORY_PATH, new_name, str(new_count))).mkdir(parents=True, exist_ok=True)
+
+
+def map_to_session(top_level, sub_level):
+    return {
+        'name': path.basename(top_level),
+        'sessions': sub_level
+    }
 
 
 def get_sessions():
-    return [dI for dI in listdir(SESSIONS_DIRECTORY_PATH) if not path.splitext(dI)[1]]
+    return [map_to_session(top_level, listdir(top_level)) for top_level in
+            glob(path.join(SESSIONS_DIRECTORY_PATH, '*[!json]'))]
 
 
-
-
+def get_sessions_by_name(name):
+    return listdir(path.join(SESSIONS_DIRECTORY_PATH, name))
 

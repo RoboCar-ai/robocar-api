@@ -2,12 +2,14 @@ version: '3'
 services:
   web:
     build: .
-    image: blown302/robocar-ai
-    command: ['python3', '/app/app.py']
+    image: blown302/robocar-car-api
+    command: ['python3', '/app/repositories/data.py']
+#    command: ['python3', '/app/app.py']
     volumes:
       - .:/app
+      - /Users/blown302/programming/ml/donkey-docker:/data
     ports:
-      - 5000:5000
+      - 5001:5001
     environment:
       - BROKER_HOST=broker
   broker:
