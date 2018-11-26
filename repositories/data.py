@@ -1,5 +1,5 @@
 from os import path, mkdir, listdir
-from json import dumps as to_json
+from json import dumps as to_json, loads as to_dic
 import pathlib
 from glob import glob
 
@@ -21,17 +21,29 @@ def init():
 
 def create_session(new_name):
     name_sessions = [int(s) for s in get_sessions_by_name(new_name)]
-    new_count = max(name_sessions) + 1
+    new_count = max(name_sessions) + 1 if len(name_sessions) != 0 else 1
     with open(SESSIONS_FILE_PATH, 'w') as f:
-        f.write(to_json({'name': new_name, 'count': new_count}))
+        f.write(to_json({'name': new_name, 'count': new_count, 'status': 'active'}))
 
     pathlib.Path(path.join(SESSIONS_DIRECTORY_PATH, new_name, str(new_count))).mkdir(parents=True, exist_ok=True)
+    return {'name': new_name, 'count': new_count}
+
+
+def deactivate_current_session():
+    with open(SESSIONS_FILE_PATH, 'r') as f:
+        data = to_dic(f.read())
+
+    data['status'] = 'inactive'
+
+    with open(SESSIONS_FILE_PATH, 'w') as f:
+        f.write(to_json(data))
+    return data
 
 
 def map_to_session(top_level, sub_level):
     return {
         'name': path.basename(top_level),
-        'sessions': sub_level
+        'history': sub_level
     }
 
 
@@ -41,5 +53,9 @@ def get_sessions():
 
 
 def get_sessions_by_name(name):
-    return listdir(path.join(SESSIONS_DIRECTORY_PATH, name))
+    dir_path = path.join(SESSIONS_DIRECTORY_PATH, name)
+    if not path.isdir(dir_path):
+        return []
+
+    return listdir(dir_path)
 

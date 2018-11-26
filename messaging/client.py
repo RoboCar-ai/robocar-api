@@ -28,10 +28,10 @@ def connect():
     client.loop_start()
 
 
-def update_session(name):
+def update_session(name, status):
     current_app.logger.info("sending update message")
 
-    client.publish('robocars/{}/session'.format('blown302'), to_json({'name': name}))
+    client.publish('robocars/{}/session'.format('blown302'), to_json({'name': name, 'status': status}))
 
 
 
